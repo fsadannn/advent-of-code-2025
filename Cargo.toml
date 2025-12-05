@@ -1,3 +1,4 @@
 [workspace]
+package.license = "Apache-2.0"
 resolver = "3"
-members = ["day1", "day2", "shared"]
+members = ["day1", "day2", "day3", "shared"]
