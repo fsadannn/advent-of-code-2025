@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "day4"
+name = "day5"
 version = "0.1.0"
 dependencies = [
  "shared",
