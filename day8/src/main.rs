@@ -53,7 +53,7 @@ impl PartialOrd for Distance {
     }
 }
 
-const TAKE_FIRST_N: usize = 10;
+const TAKE_FIRST_N: usize = 1000;
 
 fn main() {
     let input = shared::get_input(8);
