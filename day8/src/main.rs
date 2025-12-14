@@ -53,6 +53,8 @@ impl PartialOrd for Distance {
     }
 }
 
+const TAKE_FIRST_N: usize = 10;
+
 fn main() {
     let input = shared::get_input(8);
     let mut points: Vec<Point> = vec![];
@@ -82,7 +84,7 @@ fn main() {
     seen.insert(distances[0].v1);
     circuits[0].insert(distances[0].v2);
     seen.insert(distances[0].v2);
-    for d in distances.iter().skip(1).take(999) {
+    for d in distances.iter().skip(1).take(TAKE_FIRST_N - 1) {
         let mut c1: Option<usize> = None;
         let mut c2: Option<usize> = None;
         for (n, c) in circuits.iter().enumerate() {
@@ -140,9 +142,77 @@ fn main() {
     }
     circuits.sort_by_key(|a| a.len());
     println!(
-        "{}",
+        "part 1: {}",
         circuits[circuits.len() - 3..]
             .iter()
             .fold(1, |acc, x| acc * x.len())
     );
+
+    let mut res2: u64 = 0;
+    circuits.clear();
+    seen.clear();
+    circuits.push(HashSet::<usize>::new());
+    circuits[0].insert(distances[0].v1);
+    seen.insert(distances[0].v1);
+    circuits[0].insert(distances[0].v2);
+    seen.insert(distances[0].v2);
+    for d in distances.iter().skip(1) {
+        let mut c1: Option<usize> = None;
+        let mut c2: Option<usize> = None;
+        for (n, c) in circuits.iter().enumerate() {
+            if c.contains(&d.v1) {
+                c1 = Some(n);
+            }
+
+            if c.contains(&d.v2) {
+                c2 = Some(n);
+            }
+        }
+
+        if c1.is_none() && c2.is_none() {
+            circuits.push(HashSet::<usize>::new());
+            circuits.last_mut().unwrap().insert(d.v1);
+            seen.insert(d.v1);
+            circuits.last_mut().unwrap().insert(d.v2);
+            seen.insert(d.v2);
+        }
+
+        if let Some(c) = c1
+            && c2.is_none()
+        {
+            circuits.get_mut(c).unwrap().insert(d.v1);
+            circuits.get_mut(c).unwrap().insert(d.v2);
+            seen.insert(d.v1);
+            seen.insert(d.v2);
+        }
+
+        if let Some(c) = c2
+            && c1.is_none()
+        {
+            circuits.get_mut(c).unwrap().insert(d.v1);
+            circuits.get_mut(c).unwrap().insert(d.v2);
+            seen.insert(d.v1);
+            seen.insert(d.v2);
+        }
+
+        if let Some(cc1) = c1
+            && let Some(cc2) = c2
+            && c1 != c2
+        {
+            let idx1 = cc1.min(cc2);
+            let idx2 = cc1.max(cc2);
+            let circuit = circuits.remove(idx2);
+            let circuit_to_update = circuits.get_mut(idx1).unwrap();
+            for c in circuit {
+                circuit_to_update.insert(c);
+            }
+        }
+
+        if seen.len() == points.len() {
+            res2 = points[d.v1].x as u64 * points[d.v2].x as u64;
+            break;
+        }
+    }
+
+    println!("part 2: {}", res2);
 }
